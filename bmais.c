@@ -291,6 +291,30 @@ void BuscaObras(TAB* a, char *cantor, char *final){
 
 }
 
+TAB* RemoveObras(TAB* a, char *cantor, char *final){
+  if(!a) return a;
+  if(a->folha){
+    int i;
+    char* chaveAtual = a->chave[0];
+    while(strcmp(chaveAtual, final) != 0){
+      for(i=0; i < (a->nchaves); i++){
+        chaveAtual = a->chave[i];
+
+        if(strcmp(a->adic[i]->cantor, cantor) == 0){
+          retira(a, a->chave[i], 2);
+          i--;
+        }
+      }
+      a = a->prox;
+    }
+  }
+  else{
+    RemoveObras(a->filho[0], cantor, final);
+  }
+  return a;
+}
+
+
 TAB* UltimoNo(TAB* a){
   if(!a) return a;
   while(!a->folha){
@@ -328,10 +352,10 @@ TAB* remover(TAB* arv, char *ch, int t){
   int i, trocou = 0;
   printf("Removendo %s...\n", ch);
   for(i = 0; i<arv->nchaves &&  strcasecmp(arv->chave[i], ch) < 0; i++);
-    if(strcasecmp(arv->chave[i] , ch) == 0 && !arv->folha){
+  if(strcasecmp(arv->chave[i] , ch) == 0 && !arv->folha){
       i++;
       trocou = 1;
-    }
+  }
   if(i < arv->nchaves && strcasecmp(arv->chave[i], ch )== 0){ //CASOS 1
     if(arv->folha){ //CASO 1
       printf("\nCASO 1\n");
@@ -345,6 +369,7 @@ TAB* remover(TAB* arv, char *ch, int t){
 
   TAB *y = arv->filho[i], *z = NULL;
   if (y->nchaves == t-1){ //CASOS 3A e 3B
+    printf("\nCASO 3A: i menor que nchaves\n");
     if(y->folha){
       if((i < arv->nchaves) && (arv->filho[i+1]->nchaves >=t)){ //CASO 3A
         printf("\nCASO 3A: i menor que nchaves\n");
@@ -503,7 +528,7 @@ void menu(){
   while(operacao){
     printf("\nDigite um numero para escolher o que fazer agora:\n");
     espera(1);
-    printf("\n0- Sair\n1- Ver a arvore\n2- Editar informacoes\n3- Remover informacao\n4- Buscar obras de um artista\n5- Liberar arvore\n6- Imprime Informacoes Secundarias.\n");
+    printf("\n0- Sair\n1- Ver a arvore\n2- Editar informacoes\n3- Remover informacao\n4- Buscar obras de um artista\n5- Liberar arvore\n6- Imprime Informacoes Secundarias.\n7- Remover todas as obras de um artista\n");
     scanf("%d", &operacao);
     setbuf(stdin, NULL);
     if(operacao == 1){
@@ -533,7 +558,13 @@ void menu(){
     }
     else if(operacao == 6){
       ImprimeInfos(arvore, 0);
-
+    }
+    else if(operacao == 7){
+      char chave[200] = "";
+      printf("\nDigite o nome do artista que voce quer remover:\n");
+      scanf("%[^\n]", chave);
+      TAB* ultimo = UltimoNo(arvore);
+      arvore = RemoveObras(arvore, chave, ultimo->chave[ultimo->nchaves-1]);  
     }
   }
   
